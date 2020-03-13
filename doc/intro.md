@@ -1,3 +1,3 @@
-# Introduction to async-tea-party
+# Introduction to vcftool
 
 TODO: write [great documentation](http://jacobian.org/writing/what-to-write/)
