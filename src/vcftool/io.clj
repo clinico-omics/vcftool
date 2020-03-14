@@ -1,13 +1,16 @@
 (ns vcftool.io
-  (:require [clojure.pprint :as pprint]))
+  (:require [clojure.pprint :as pprint]
+            [clojure.data.csv :as csv]
+            [clojure.java.io :as io]))
 
-(defn save2txt [lines file-path]
-  (with-open [wtr (clojure.java.io/writer file-path)]
-    (binding [*out* wtr]
-      (doseq [line lines] (pprint/pprint line wtr)))))
+(defn save2csv [sep lines file-path]
+  (with-open [file (io/writer file-path)]
+    (csv/write-csv file lines :separator sep :quote? #(some #{\"} %))))
 
 (defn find-out-func
   [ftype]
   (case ftype
-    "txt" save2txt
+    "csv" (partial save2csv \,)
+    "tsv" (partial save2csv \tab)
+    "txt" (partial save2csv \space)
     println))

@@ -33,4 +33,5 @@
                        :source-paths   ["src"]
                        :resource-paths ["resources"]}
              :dev   {:resource-paths ["resources"]
-                     :jvm-opts ["-Dconf=config.edn"]}})
+                     :jvm-opts ["-Dconf=config.edn"]
+                     :dependencies [[org.clojure/tools.namespace "1.0.0"]]}})

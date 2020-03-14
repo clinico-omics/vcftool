@@ -1,5 +1,6 @@
 (ns vcftool.vcflib.header-parser
   (:require [clojure.java.io :as io]
+            [clojure.string :as string]
             [clojure.tools.logging :as log]
             [blancas.kern.core :refer [token* field* sym* bind many any-char return sep-by value >> <|>]]
             [blancas.kern.lexer.basic :refer [string-lit dec-lit angles comma-sep token one-of]]))
@@ -72,19 +73,21 @@
 
 (defn parse-metadata-headers
   "Parse all the VCF metadata headers. Return a nested map."
-  [xs]
-  (reduce (fn [accum [k v]]
-            (if
-             (and (map? v) (:id v)) (assoc-in accum [k (:id v)] v)
-             (assoc accum k v)))
-          {}
-          (map parse-header-line xs)))
+  ([xs] (parse-metadata-headers parse-header-line xs))
+  ([func xs]
+   (reduce (fn [accum [k v]]
+             (if
+              (and (map? v) (:id v)) (assoc-in accum [k (:id v)] v)
+              (assoc accum k v)))
+           {}
+           (map func xs))))
 
 (defn parse-headers
   "Parse the VCF metadata and column headers. Return a nested map with
    the column names under the :columns key."
   [xs]
   (let [[metadata-headers [column-header]] (split-with (partial re-find #"^##") xs)
+        headers (string/replace (apply str (interpose "\n" metadata-headers)) #"\"" "'") ; No replace will cause the output have multiple quotes.
         metadata (parse-metadata-headers metadata-headers)
         columns  (parse-column-header column-header)]
-    (assoc metadata :columns columns)))
+    (assoc metadata :columns columns :metadata-headers headers)))

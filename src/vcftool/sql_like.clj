@@ -1,4 +1,5 @@
 (ns vcftool.sql-like
+  (:require [clojure.string :as string])
   (:refer-clojure :exclude [or and]))
 
 (def db (atom {}))
@@ -19,13 +20,20 @@
      (fn [~'%]
        ~pred-body)))
 
+(defn nested-attr
+  [attr record]
+  (get-in record 
+          (map #(keyword (string/replace % ":" "")) 
+               (string/split (str attr) #"/"))))
+
 (def-filter eq
   [attr val]
-  (= (attr %) val))
+  (= (nested-attr attr %) val))
 
 (def-filter gt
   [attr val]
-  (pos? (compare (attr %) val)))
+  (pos? (compare 
+         (nested-attr attr %) val)))
 
 (def-filter and
   [& preds]
